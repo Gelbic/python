@@ -3,6 +3,7 @@
 import os
 import sqlite3
 from flask import Flask, render_template, request, redirect, url_for, jsonify
+import datetime
 
 app = Flask(__name__)
 DB_PATH = "zakazky.db"
@@ -87,9 +88,21 @@ def index():
         ORDER BY due_date ASC
         LIMIT 5
     """).fetchall()
+
+    # Nová část: Zakázky před termínem (do 10 dnů)
+    today = datetime.date.today()
+    in_ten_days = today + datetime.timedelta(days=10)
+
+    upcoming_jobs = conn.execute("""
+        SELECT jobs.*, customers.name AS customer_name
+        FROM jobs
+        LEFT JOIN customers ON jobs.customer_id = customers.id
+        WHERE date(jobs.due_date) BETWEEN date(?) AND date(?)
+        ORDER BY due_date ASC
+    """, (today.isoformat(), in_ten_days.isoformat(),)).fetchall()
     
     conn.close()
-    return render_template("index.html", jobs_count=jobs_count, customers_count=customers_count, jobs=jobs)
+    return render_template("index.html", jobs_count=jobs_count, customers_count=customers_count, jobs=jobs, upcoming_jobs=upcoming_jobs)
 
 @app.route("/jobs")
 def job_list():

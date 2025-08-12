@@ -1,32 +1,3 @@
-<!-- Soubor: templates/layout.html -->
-<!DOCTYPE html>
-<html lang="cs">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Správa zakázek{% endblock %}</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
-    <style>
-        body { font-family: 'Inter', sans-serif; }
-    </style>
-</head>
-<body class="bg-gray-100 text-gray-800">
-    <nav class="bg-white shadow-md p-4">
-        <div class="container mx-auto flex justify-between items-center">
-            <a href="{{ url_for('index') }}" class="text-2xl font-bold text-gray-900">Správa zakázek</a>
-            <div>
-                <a href="{{ url_for('job_list') }}" class="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md font-medium">Zakázky</a>
-                <a href="{{ url_for('customer_list') }}" class="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md font-medium">Zákazníci</a>
-            </div>
-        </div>
-    </nav>
-    <main class="container mx-auto p-4 md:p-8">
-        {% block content %}{% endblock %}
-    </main>
-</body>
-</html>
-
 <!-- Soubor: templates/index.html -->
 {% extends "layout.html" %}
 {% block title %}Dashboard{% endblock %}
@@ -40,6 +11,11 @@
     <div class="bg-white p-6 rounded-lg shadow-md">
         <h2 class="text-2xl font-semibold text-gray-700">Registrovaní zákazníci</h2>
         <p class="text-5xl font-bold text-gray-900 mt-4">{{ customers_count }}</p>
+    </div>
+    <!-- Zvýrazněná karta pro blížící se zakázky -->
+    <div class="bg-white p-6 rounded-lg shadow-md border-l-4 border-red-400">
+        <h2 class="text-2xl font-semibold text-red-700">Před termínem</h2>
+        <p class="text-5xl font-bold text-red-900 mt-4">{{ upcoming_jobs | length }}</p>
     </div>
 </div>
 
@@ -76,16 +52,8 @@
         </tbody>
     </table>
 </div>
-{% endblock %}
 
-<!-- Soubor: templates/job_list.html -->
-{% extends "layout.html" %}
-{% block title %}Zakázky{% endblock %}
-{% block content %}
-<div class="flex justify-between items-center mb-6">
-    <h1 class="text-4xl font-bold">Zakázky</h1>
-    <a href="{{ url_for('add_job') }}" class="bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700">Nová zakázka</a>
-</div>
+<h2 class="text-3xl font-bold mt-8 mb-4">Zakázky před termínem</h2>
 <div class="bg-white p-6 rounded-lg shadow-md">
     <table class="min-w-full divide-y divide-gray-200">
         <thead class="bg-gray-50">
@@ -99,8 +67,8 @@
             </tr>
         </thead>
         <tbody class="bg-white divide-y divide-gray-200">
-            {% for job in jobs %}
-            <tr>
+            {% for job in upcoming_jobs %}
+            <tr class="bg-red-50">
                 <td class="px-6 py-4 whitespace-nowrap">{{ job.job_number }}</td>
                 <td class="px-6 py-4 whitespace-nowrap">{{ job.job_name }}</td>
                 <td class="px-6 py-4 whitespace-nowrap">{{ job.customer_name }}</td>
@@ -112,235 +80,10 @@
             </tr>
             {% else %}
             <tr>
-                <td colspan="6" class="px-6 py-4 text-center text-gray-500">Zatím nejsou žádné zakázky.</td>
+                <td colspan="6" class="px-6 py-4 text-center text-gray-500">Žádné blížící se zakázky.</td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
 </div>
-{% endblock %}
-
-<!-- Soubor: templates/job_form.html -->
-{% extends "layout.html" %}
-{% block title %}Přidat zakázku{% endblock %}
-{% block content %}
-<h1 class="text-4xl font-bold mb-6">{{ 'Upravit' if job else 'Nová' }} zakázka</h1>
-<form action="{{ url_for('add_job') if not job else url_for('edit_job', job_id=job.id) }}" method="post" class="bg-white p-6 rounded-lg shadow-md max-w-lg mx-auto">
-    <div class="mb-4">
-        <label for="job_number" class="block text-gray-700">Číslo zakázky</label>
-        <input type="text" id="job_number" name="job_number" value="{{ job.job_number if job else '' }}" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
-    </div>
-    <div class="mb-4">
-        <label for="job_name" class="block text-gray-700">Název zakázky</label>
-        <input type="text" id="job_name" name="job_name" value="{{ job.job_name if job else '' }}" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
-    </div>
-    <div class="mb-4">
-        <label for="customer_id" class="block text-gray-700">Zákazník</label>
-        <select id="customer_id" name="customer_id" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
-            {% for customer in customers %}
-                <option value="{{ customer.id }}" {% if job and customer.id == job.customer_id %}selected{% endif %}>{{ customer.name }}</option>
-            {% endfor %}
-        </select>
-    </div>
-    <div class="mb-4">
-        <label for="description" class="block text-gray-700">Popis</label>
-        <textarea id="description" name="description" rows="4" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">{{ job.description if job else '' }}</textarea>
-    </div>
-    <div class="mb-4">
-        <label for="status" class="block text-gray-700">Stav</label>
-        <select id="status" name="status" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
-            <option value="Nová" {% if job and job.status == 'Nová' %}selected{% endif %}>Nová</option>
-            <option value="Rozpracovaná" {% if job and job.status == 'Rozpracovaná' %}selected{% endif %}>Rozpracovaná</option>
-            <option value="Dokončená" {% if job and job.status == 'Dokončená' %}selected{% endif %}>Dokončená</option>
-            <option value="Fakturovaná" {% if job and job.status == 'Fakturovaná' %}selected{% endif %}>Fakturovaná</option>
-        </select>
-    </div>
-    <div class="mb-4">
-        <label for="due_date" class="block text-gray-700">Termín dokončení</label>
-        <input type="date" id="due_date" name="due_date" value="{{ job.due_date if job else '' }}" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
-    </div>
-    <div class="mb-4">
-        <label for="price" class="block text-gray-700">Cena zakázky</label>
-        <input type="number" step="0.01" id="price" name="price" value="{{ job.price if job else '' }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
-    </div>
-    <div class="flex justify-end space-x-2">
-        <button type="submit" class="bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700">Uložit</button>
-    </div>
-</form>
-{% endblock %}
-
-<!-- Soubor: templates/customer_list.html -->
-{% extends "layout.html" %}
-{% block title %}Zákazníci{% endblock %}
-{% block content %}
-<div class="flex justify-between items-center mb-6">
-    <h1 class="text-4xl font-bold">Zákazníci</h1>
-    <a href="{{ url_for('add_customer') }}" class="bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700">Nový zákazník</a>
-</div>
-<div class="bg-white p-6 rounded-lg shadow-md">
-    <table class="min-w-full divide-y divide-gray-200">
-        <thead class="bg-gray-50">
-            <tr>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Jméno / Firma</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Adresa</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Kontakt</th>
-                <th class="px-6 py-3"></th>
-            </tr>
-        </thead>
-        <tbody class="bg-white divide-y divide-gray-200">
-            {% for customer in customers %}
-            <tr>
-                <td class="px-6 py-4 whitespace-nowrap">{{ customer.name }} / {{ customer.company }}</td>
-                <td class="px-6 py-4 whitespace-nowrap">{{ customer.address }}</td>
-                <td class="px-6 py-4 whitespace-nowrap">{{ customer.phone }} / {{ customer.email }}</td>
-                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <a href="#" class="text-indigo-600 hover:text-indigo-900">Historie</a>
-                </td>
-            </tr>
-            {% else %}
-            <tr>
-                <td colspan="4" class="px-6 py-4 text-center text-gray-500">Zatím nejsou žádní zákazníci.</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-</div>
-{% endblock %}
-
-<!-- Soubor: templates/customer_form.html -->
-{% extends "layout.html" %}
-{% block title %}Přidat zákazníka{% endblock %}
-{% block content %}
-<h1 class="text-4xl font-bold mb-6">Nový zákazník</h1>
-<form action="{{ url_for('add_customer') }}" method="post" class="bg-white p-6 rounded-lg shadow-md max-w-lg mx-auto">
-    <div class="mb-4">
-        <label for="name" class="block text-gray-700">Jméno / Firma</label>
-        <input type="text" id="name" name="name" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
-    </div>
-    <div class="mb-4">
-        <label for="company" class="block text-gray-700">Firma (volitelné)</label>
-        <input type="text" id="company" name="company" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
-    </div>
-    <div class="mb-4">
-        <label for="address" class="block text-gray-700">Adresa</label>
-        <input type="text" id="address" name="address" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
-    </div>
-    <div class="mb-4">
-        <label for="phone" class="block text-gray-700">Telefon</label>
-        <input type="tel" id="phone" name="phone" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
-    </div>
-    <div class="mb-4">
-        <label for="email" class="block text-gray-700">E-mail</label>
-        <input type="email" id="email" name="email" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
-    </div>
-    <div class="flex justify-end space-x-2">
-        <button type="submit" class="bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700">Uložit</button>
-    </div>
-</form>
-{% endblock %}
-
-<!-- Soubor: templates/job_detail.html -->
-{% extends "layout.html" %}
-{% block title %}{{ job.job_name }}{% endblock %}
-{% block content %}
-<div class="bg-white p-6 rounded-lg shadow-md mb-8">
-    <div class="flex justify-between items-center mb-4">
-        <h1 class="text-4xl font-bold text-gray-900">{{ job.job_name }}</h1>
-        <div class="flex space-x-2">
-            <a href="{{ url_for('edit_job', job_id=job.id) }}" class="bg-yellow-500 text-white py-2 px-4 rounded-md hover:bg-yellow-600">Upravit</a>
-            <form action="{{ url_for('delete_job', job_id=job.id) }}" method="post" onsubmit="return confirm('Opravdu chcete tuto zakázku smazat? Všechny úkoly budou smazány.');">
-                <button type="submit" class="bg-red-600 text-white py-2 px-4 rounded-md hover:bg-red-700">Smazat</button>
-            </form>
-        </div>
-    </div>
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-            <h2 class="text-2xl font-semibold text-gray-700 mb-2">Detaily zakázky</h2>
-            <p><strong class="font-medium">Číslo:</strong> {{ job.job_number }}</p>
-            <p><strong class="font-medium">Stav:</strong> {{ job.status }}</p>
-            <p><strong class="font-medium">Termín:</strong> {{ job.due_date }}</p>
-            <p><strong class="font-medium">Cena:</strong> {{ "%.2f Kč" | format(job.price) if job.price else "Neuvedeno" }}</p>
-            <p class="mt-4"><strong class="font-medium">Popis:</strong></p>
-            <p class="mt-1 text-gray-600">{{ job.description }}</p>
-        </div>
-        <div>
-            <h2 class="text-2xl font-semibold text-gray-700 mb-2">Zákazník</h2>
-            <p><strong class="font-medium">Jméno:</strong> {{ job.customer_name }}</p>
-            <p><strong class="font-medium">Firma:</strong> {{ job.company }}</p>
-            <p><strong class="font-medium">Telefon:</strong> {{ job.phone }}</p>
-            <p><strong class="font-medium">E-mail:</strong> {{ job.email }}</p>
-        </div>
-    </div>
-</div>
-
-<div class="bg-white p-6 rounded-lg shadow-md">
-    <h2 class="text-2xl font-semibold text-gray-700 mb-4">Úkoly</h2>
-    <form id="task-form" class="flex space-x-2 mb-4">
-        <input type="hidden" name="job_id" value="{{ job.id }}">
-        <input type="text" name="task_name" placeholder="Název úkolu" required class="flex-1 rounded-md border-gray-300 shadow-sm">
-        <input type="text" name="notes" placeholder="Poznámky" class="flex-1 rounded-md border-gray-300 shadow-sm">
-        <input type="date" name="due_date" class="rounded-md border-gray-300 shadow-sm">
-        <button type="submit" class="bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700">Přidat úkol</button>
-    </form>
-    <ul id="task-list" class="divide-y divide-gray-200">
-        {% for task in tasks %}
-        <li class="py-4 flex justify-between items-center" data-task-id="{{ task.id }}">
-            <div>
-                <input type="checkbox" {% if task.is_completed %}checked{% endif %} class="toggle-task-status mr-2">
-                <span class="text-lg {% if task.is_completed %}line-through text-gray-500{% endif %}">{{ task.task_name }}</span>
-                {% if task.notes %}
-                    <span class="ml-2 text-sm text-gray-500">({{ task.notes }})</span>
-                {% endif %}
-            </div>
-            <span class="text-sm text-gray-400">{{ task.due_date }}</span>
-        </li>
-        {% else %}
-        <li class="py-4 text-center text-gray-500">Zatím nebyly přidány žádné úkoly.</li>
-        {% endfor %}
-    </ul>
-</div>
-
-<script>
-    document.getElementById('task-form').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const formData = new FormData(e.target);
-        const data = Object.fromEntries(formData.entries());
-        
-        const response = await fetch('/tasks/add', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: new URLSearchParams(data)
-        });
-        const result = await response.json();
-        
-        if (result.success) {
-            window.location.reload();
-        } else {
-            alert('Chyba při přidávání úkolu.');
-        }
-    });
-
-    document.getElementById('task-list').addEventListener('change', async (e) => {
-        if (e.target.classList.contains('toggle-task-status')) {
-            const taskId = e.target.closest('li').dataset.taskId;
-            
-            const response = await fetch(`/tasks/${taskId}/toggle`, {
-                method: 'POST'
-            });
-            const result = await response.json();
-            
-            if (result.success) {
-                const textSpan = e.target.closest('li').querySelector('span');
-                if (result.new_status === 1) {
-                    textSpan.classList.add('line-through', 'text-gray-500');
-                } else {
-                    textSpan.classList.remove('line-through', 'text-gray-500');
-                }
-            } else {
-                alert('Chyba při změně stavu úkolu.');
-                e.target.checked = !e.target.checked; // Vrátí checkbox do původního stavu
-            }
-        }
-    });
-</script>
 {% endblock %}

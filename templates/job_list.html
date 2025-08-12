@@ -1,0 +1,41 @@
+<!-- Soubor: templates/job_list.html -->
+{% extends "layout.html" %}
+{% block title %}Zakázky{% endblock %}
+{% block content %}
+<div class="flex justify-between items-center mb-6">
+    <h1 class="text-4xl font-bold">Zakázky</h1>
+    <a href="{{ url_for('add_job') }}" class="bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700">Nová zakázka</a>
+</div>
+<div class="bg-white p-6 rounded-lg shadow-md">
+    <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+            <tr>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Číslo</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Název</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Zákazník</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stav</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Termín</th>
+                <th class="px-6 py-3"></th>
+            </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+            {% for job in jobs %}
+            <tr>
+                <td class="px-6 py-4 whitespace-nowrap">{{ job.job_number }}</td>
+                <td class="px-6 py-4 whitespace-nowrap">{{ job.job_name }}</td>
+                <td class="px-6 py-4 whitespace-nowrap">{{ job.customer_name }}</td>
+                <td class="px-6 py-4 whitespace-nowrap">{{ job.status }}</td>
+                <td class="px-6 py-4 whitespace-nowrap">{{ job.due_date }}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                    <a href="{{ url_for('job_detail', job_id=job.id) }}" class="text-indigo-600 hover:text-indigo-900">Detail</a>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="6" class="px-6 py-4 text-center text-gray-500">Zatím nejsou žádné zakázky.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
