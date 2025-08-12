@@ -1,17 +1,22 @@
-# File: app.py
+
 
 import os
 import sqlite3
-from flask import Flask, render_template, request, redirect, url_for, jsonify
+from flask import Flask, render_template, request, redirect, url_for, jsonify, session, g
+from functools import wraps
 import datetime
 
 app = Flask(__name__)
-DB_PATH = "zakazky.db"
+# Pro použití session je potřeba nastavit tajný klíč
+app.secret_key = 'tajny-klic-pro-session'
+
+# Heslo pro přístup do systému
+PASSWORD = "zakazky"
 
 # --- Správa databáze ---
 def get_db_connection():
     """Vytvoří připojení k databázi SQLite."""
-    conn = sqlite3.connect(DB_PATH)
+    conn = sqlite3.connect(os.path.join(app.root_path, "zakazky.db"))
     conn.row_factory = sqlite3.Row
     return conn
 
@@ -70,10 +75,42 @@ def init_db():
 # Spuštění inicializace databáze
 init_db()
 
+# --- Autentifikace a routy ---
 
-# --- Routy pro aplikaci ---
+def login_required(f):
+    """Dekorátor pro ochranu rout heslem."""
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'logged_in' not in session:
+            return redirect(url_for('login'))
+        return f(*args, **kwargs)
+    return decorated_function
+
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    """Přihlašovací stránka."""
+    if request.method == "POST":
+        if request.form.get("password") == PASSWORD:
+            session['logged_in'] = True
+            return redirect(url_for('index'))
+        else:
+            return render_template("login.html", error="Nesprávné heslo")
+    return render_template("login.html")
+
+@app.route("/logout")
+def logout():
+    """Odhlášení."""
+    session.pop('logged_in', None)
+    return redirect(url_for('login'))
+
+@app.before_request
+def before_request():
+    g.user = None
+    if 'logged_in' in session:
+        g.user = "admin" # Jen pro ilustraci, že je uživatel přihlášen
 
 @app.route("/")
+@login_required
 def index():
     """Hlavní dashboard s přehledem aktivních zakázek."""
     conn = get_db_connection()
@@ -105,6 +142,7 @@ def index():
     return render_template("index.html", jobs_count=jobs_count, customers_count=customers_count, jobs=jobs, upcoming_jobs=upcoming_jobs)
 
 @app.route("/jobs")
+@login_required
 def job_list():
     """Zobrazí seznam všech zakázek."""
     conn = get_db_connection()
@@ -118,6 +156,7 @@ def job_list():
     return render_template("job_list.html", jobs=jobs)
 
 @app.route("/jobs/add", methods=["GET", "POST"])
+@login_required
 def add_job():
     """Formulář pro přidání nové zakázky."""
     conn = get_db_connection()
@@ -149,6 +188,7 @@ def add_job():
     return render_template("job_form.html", customers=customers)
 
 @app.route("/jobs/<int:job_id>")
+@login_required
 def job_detail(job_id):
     """Zobrazí detail konkrétní zakázky."""
     conn = get_db_connection()
@@ -166,6 +206,7 @@ def job_detail(job_id):
 
 
 @app.route("/jobs/<int:job_id>/edit", methods=["GET", "POST"])
+@login_required
 def edit_job(job_id):
     """Formulář pro úpravu zakázky."""
     conn = get_db_connection()
@@ -198,6 +239,7 @@ def edit_job(job_id):
     return render_template("job_form.html", job=job, customers=customers)
     
 @app.route("/jobs/<int:job_id>/delete", methods=["POST"])
+@login_required
 def delete_job(job_id):
     """Smaže zakázku a všechny její úkoly."""
     conn = get_db_connection()
@@ -209,6 +251,7 @@ def delete_job(job_id):
 
 
 @app.route("/customers")
+@login_required
 def customer_list():
     """Zobrazí seznam všech zákazníků."""
     conn = get_db_connection()
@@ -217,6 +260,7 @@ def customer_list():
     return render_template("customer_list.html", customers=customers)
 
 @app.route("/customers/add", methods=["GET", "POST"])
+@login_required
 def add_customer():
     """Formulář pro přidání nového zákazníka."""
     if request.method == "POST":
@@ -238,6 +282,7 @@ def add_customer():
     return render_template("customer_form.html")
 
 @app.route("/tasks/add", methods=["POST"])
+@login_required
 def add_task():
     """API pro přidání nového úkolu k zakázce."""
     job_id = request.form["job_id"]
@@ -255,6 +300,7 @@ def add_task():
     return jsonify({"success": True})
 
 @app.route("/tasks/<int:task_id>/toggle", methods=["POST"])
+@login_required
 def toggle_task(task_id):
     """API pro přepnutí stavu úkolu (dokončený/nedokončený)."""
     conn = get_db_connection()
