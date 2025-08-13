@@ -1,0 +1,79 @@
+<!-- Soubor: templates/invoice.html -->
+{% extends "layout.html" %}
+{% block title %}Faktura {{ job.job_number }}{% endblock %}
+{% block content %}
+<div class="bg-white p-12 rounded-lg shadow-md max-w-2xl mx-auto printable">
+    <div class="flex justify-between items-center mb-8">
+        <h1 class="text-3xl font-bold">FAKTURA</h1>
+        <div class="text-right">
+            <p><strong>Číslo zakázky:</strong> {{ job.job_number }}</p>
+            <p><strong>Datum fakturace:</strong> {{ job.invoice_date | default(now_date) }}</p>
+            <p class="no-print mt-2">
+                {% if job.payment_status == 'Nezaplaceno' %}
+                <form action="{{ url_for('set_invoice_paid', job_id=job.id) }}" method="post" class="inline">
+                    <button type="submit" class="bg-blue-600 text-white py-1 px-3 rounded-md hover:bg-blue-700">Označit jako uhrazeno</button>
+                </form>
+                {% else %}
+                    <span class="text-green-500">Uhrazeno</span>
+                {% endif %}
+            </p>
+        </div>
+    </div>
+    
+    <div class="grid grid-cols-2 gap-4 mb-8">
+        <div>
+            <h2 class="font-semibold text-lg mb-2">Dodavatel</h2>
+            <p>Firma: Správce zakázek</p>
+            <p>Adresa: Svitavy</p>
+            <p>E-mail: info@správazakázek.cz</p>
+            <p>Telefon: +420 123 456 789</p>
+        </div>
+        <div>
+            <h2 class="font-semibold text-lg mb-2">Zákazník</h2>
+            <p>Firma: {{ job.company }}</p>
+            <p>Jméno: {{ job.customer_name }}</p>
+            <p>Adresa: {{ job.address }}</p>
+            <p>E-mail: {{ job.email }}</p>
+            <p>Telefon: {{ job.phone }}</p>
+        </div>
+    </div>
+    
+    <table class="min-w-full divide-y divide-gray-200 mb-8">
+        <thead class="bg-gray-50">
+            <tr>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Popis</th>
+                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Částka (Kč)</th>
+            </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+            {% if job.price %}
+            <tr>
+                <td class="px-6 py-4 whitespace-nowrap">Pevná cena za zakázku "{{ job.job_name }}"</td>
+                <td class="px-6 py-4 whitespace-nowrap text-right">{{ "%.2f" | format(job.price) }}</td>
+            </tr>
+            {% endif %}
+            {% if job.hourly_rate and hours > 0 %}
+            <tr>
+                <td class="px-6 py-4 whitespace-nowrap">Hodinová práce ({{ "%.2f" | format(hours) }}h x {{ "%.2f" | format(job.hourly_rate) }} Kč/h)</td>
+                <td class="px-6 py-4 whitespace-nowrap text-right">{{ "%.2f" | format(hours * job.hourly_rate) }}</td>
+            </tr>
+            {% endif %}
+            {% for service in additional_services %}
+            <tr>
+                <td class="px-6 py-4 whitespace-nowrap">{{ service.service_name }}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-right">{{ "%.2f" | format(service.cost) }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="text-right font-bold text-xl mb-8">
+        Celková cena: {{ "%.2f Kč" | format(total_price) }}
+    </div>
+
+    <div class="text-center">
+        <p class="mb-4">Děkujeme za vaši důvěru a těšíme se na další spolupráci.</p>
+        <button onclick="window.print()" class="no-print bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700">Tisk / Uložit do PDF</button>
+    </div>
+</div>
+{% endblock %}

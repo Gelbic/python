@@ -9,16 +9,24 @@
     <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
     <style>
         body { font-family: 'Inter', sans-serif; }
+        @media print {
+            .no-print {
+                display: none;
+            }
+        }
     </style>
 </head>
 <body class="bg-gray-100 text-gray-800">
     {% if g.user %}
-    <nav class="bg-white shadow-md p-4">
+    <nav class="no-print bg-white shadow-md p-4">
         <div class="container mx-auto flex justify-between items-center">
             <a href="{{ url_for('index') }}" class="text-2xl font-bold text-gray-900">Správa zakázek</a>
             <div class="flex items-center space-x-4">
+                <a href="{{ url_for('index') }}" class="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md font-medium">Domů</a>
                 <a href="{{ url_for('job_list') }}" class="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md font-medium">Zakázky</a>
                 <a href="{{ url_for('customer_list') }}" class="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md font-medium">Zákazníci</a>
+                <a href="{{ url_for('worker_list') }}" class="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md font-medium">Pracovníci</a>
+                <a href="{{ url_for('invoice_list') }}" class="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md font-medium">Faktury</a>
                 <a href="{{ url_for('logout') }}" class="text-white bg-red-500 hover:bg-red-600 px-3 py-2 rounded-md font-medium">Odhlásit</a>
             </div>
         </div>
@@ -27,5 +35,8 @@
     <main class="container mx-auto p-4 md:p-8">
         {% block content %}{% endblock %}
     </main>
+    <footer class="no-print text-center text-gray-500 text-sm mt-8">
+        <p>&copy; 2025 Jan Galba, Svitavy. Všechna práva vyhrazena.</p>
+    </footer>
 </body>
 </html>

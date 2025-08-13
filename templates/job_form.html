@@ -38,8 +38,12 @@
         <input type="date" id="due_date" name="due_date" value="{{ job.due_date if job else '' }}" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
     </div>
     <div class="mb-4">
-        <label for="price" class="block text-gray-700">Cena zakázky</label>
+        <label for="price" class="block text-gray-700">Pevná cena zakázky (Kč)</label>
         <input type="number" step="0.01" id="price" name="price" value="{{ job.price if job else '' }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+    </div>
+    <div class="mb-4">
+        <label for="hourly_rate" class="block text-gray-700">Hodinová sazba (Kč)</label>
+        <input type="number" step="0.01" id="hourly_rate" name="hourly_rate" value="{{ job.hourly_rate if job else '' }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
     </div>
     <div class="flex justify-end space-x-2">
         <button type="submit" class="bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700">Uložit</button>
