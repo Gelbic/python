@@ -19,16 +19,31 @@
 <body class="bg-gray-100 text-gray-800">
     {% if g.user %}
     <nav class="no-print bg-white shadow-md p-4">
-        <div class="container mx-auto flex justify-between items-center">
-            <a href="{{ url_for('index') }}" class="text-2xl font-bold text-gray-900">Správa zakázek</a>
-            <div class="flex items-center space-x-4">
+        <div class="container mx-auto flex flex-col md:flex-row justify-between items-center md:items-center">
+            <a href="{{ url_for('index') }}" class="text-2xl font-bold text-gray-900 mb-2 md:mb-0">Správa zakázek</a>
+            <button id="hamburger-btn" class="md:hidden text-gray-600 focus:outline-none">
+                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+            </button>
+            <div id="desktop-menu" class="hidden md:flex items-center space-x-4">
                 <a href="{{ url_for('index') }}" class="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md font-medium">Domů</a>
                 <a href="{{ url_for('job_list') }}" class="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md font-medium">Zakázky</a>
                 <a href="{{ url_for('customer_list') }}" class="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md font-medium">Zákazníci</a>
                 <a href="{{ url_for('worker_list') }}" class="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md font-medium">Pracovníci</a>
                 <a href="{{ url_for('invoice_list') }}" class="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md font-medium">Faktury</a>
+                <a href="{{ url_for('settings') }}" class="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md font-medium">Nastavení</a>
                 <a href="{{ url_for('logout') }}" class="text-white bg-red-500 hover:bg-red-600 px-3 py-2 rounded-md font-medium">Odhlásit</a>
             </div>
+        </div>
+        <div id="mobile-menu" class="hidden md:hidden p-4 space-y-2">
+            <a href="{{ url_for('index') }}" class="block text-gray-600 hover:text-gray-900 py-2 rounded-md font-medium">Domů</a>
+            <a href="{{ url_for('job_list') }}" class="block text-gray-600 hover:text-gray-900 py-2 rounded-md font-medium">Zakázky</a>
+            <a href="{{ url_for('customer_list') }}" class="block text-gray-600 hover:text-gray-900 py-2 rounded-md font-medium">Zákazníci</a>
+            <a href="{{ url_for('worker_list') }}" class="block text-gray-600 hover:text-gray-900 py-2 rounded-md font-medium">Pracovníci</a>
+            <a href="{{ url_for('invoice_list') }}" class="block text-gray-600 hover:text-gray-900 py-2 rounded-md font-medium">Faktury</a>
+            <a href="{{ url_for('settings') }}" class="block text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md font-medium">Nastavení</a>
+            <a href="{{ url_for('logout') }}" class="block text-white bg-red-500 hover:bg-red-600 py-2 rounded-md font-medium">Odhlásit</a>
         </div>
     </nav>
     {% endif %}
@@ -38,5 +53,11 @@
     <footer class="no-print text-center text-gray-500 text-sm mt-8">
         <p>&copy; 2025 Jan Galba, Svitavy. Všechna práva vyhrazena.</p>
     </footer>
+    <script>
+        document.getElementById('hamburger-btn').addEventListener('click', () => {
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenu.classList.toggle('hidden');
+        });
+    </script>
 </body>
 </html>
