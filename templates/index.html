@@ -3,74 +3,87 @@
 {% block title %}Dashboard{% endblock %}
 {% block content %}
 <h1 class="text-4xl font-bold mb-8">Přehled</h1>
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
     <div class="bg-white p-6 rounded-lg shadow-md">
         <h2 class="text-2xl font-semibold text-gray-700">Aktivní zakázky</h2>
         <p class="text-5xl font-bold text-gray-900 mt-4">{{ jobs_count }}</p>
+        <a href="{{ url_for('active_jobs_list') }}" class="text-indigo-600 hover:text-indigo-900 text-sm font-medium">Zobrazit</a>
     </div>
     <div class="bg-white p-6 rounded-lg shadow-md">
         <h2 class="text-2xl font-semibold text-gray-700">Registrovaní zákazníci</h2>
         <p class="text-5xl font-bold text-gray-900 mt-4">{{ customers_count }}</p>
+        <a href="{{ url_for('customer_list') }}" class="text-indigo-600 hover:text-indigo-900 text-sm font-medium">Zobrazit</a>
     </div>
     <!-- Zvýrazněná karta pro blížící se zakázky -->
     <div class="bg-white p-6 rounded-lg shadow-md border-l-4 border-red-400">
         <h2 class="text-2xl font-semibold text-red-700">Před termínem</h2>
         <p class="text-5xl font-bold text-red-900 mt-4">{{ upcoming_jobs | length }}</p>
+        <a href="{{ url_for('upcoming_jobs_list') }}" class="text-indigo-600 hover:text-indigo-900 text-sm font-medium">Zobrazit</a>
+    </div>
+    <!-- Nová karta pro neuhrazené faktury -->
+    <div class="bg-white p-6 rounded-lg shadow-md border-l-4 border-red-400">
+        <h2 class="text-2xl font-semibold text-red-700">Neuhrazené faktury</h2>
+        <p class="text-5xl font-bold text-red-900 mt-4">{{ unpaid_invoices_count }}</p>
+        <a href="{{ url_for('unpaid_invoices_list') }}" class="text-indigo-600 hover:text-indigo-900 text-sm font-medium">Zobrazit</a>
     </div>
 </div>
 
 <h2 class="text-3xl font-bold mt-8 mb-4">Měsíční statistiky</h2>
 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-    <div class="bg-white p-6 rounded-lg shadow-md">
+    <div class="bg-white p-6 rounded-lg shadow-md overflow-x-auto">
         <h3 class="text-xl font-semibold text-gray-700 mb-4">Počet zakázek za měsíc</h3>
-        <table class="min-w-full divide-y divide-gray-200">
-            <thead class="bg-gray-50">
-                <tr>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Měsíc</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Počet zakázek</th>
-                </tr>
-            </thead>
-            <tbody class="bg-white divide-y divide-gray-200">
-                {% for stat in monthly_jobs %}
-                <tr>
-                    <td class="px-6 py-4 whitespace-nowrap">{{ stat.month }}</td>
-                    <td class="px-6 py-4 whitespace-nowrap">{{ stat.count }}</td>
-                </tr>
-                {% else %}
-                <tr>
-                    <td colspan="2" class="px-6 py-4 text-center text-gray-500">Žádné statistiky.</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+        <div>
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Měsíc</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Počet zakázek</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    {% for stat in monthly_jobs %}
+                    <tr>
+                        <td class="px-6 py-4 whitespace-nowrap">{{ stat.month }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">{{ stat.count }}</td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="2" class="px-6 py-4 text-center text-gray-500">Žádné statistiky.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
     <div class="bg-white p-6 rounded-lg shadow-md">
         <h3 class="text-xl font-semibold text-gray-700 mb-4">Tržby za měsíc (uhrazené)</h3>
-        <table class="min-w-full divide-y divide-gray-200">
-            <thead class="bg-gray-50">
-                <tr>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Měsíc</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tržby</th>
-                </tr>
-            </thead>
-            <tbody class="bg-white divide-y divide-gray-200">
-                {% for stat in monthly_revenue %}
-                <tr>
-                    <td class="px-6 py-4 whitespace-nowrap">{{ stat.month }}</td>
-                    <td class="px-6 py-4 whitespace-nowrap">{{ "%.2f Kč" | format(stat.total) }}</td>
-                </tr>
-                {% else %}
-                <tr>
-                    <td colspan="2" class="px-6 py-4 text-center text-gray-500">Žádné statistiky.</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Měsíc</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tržby</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    {% for stat in monthly_revenue %}
+                    <tr>
+                        <td class="px-6 py-4 whitespace-nowrap">{{ stat.month }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">{{ "%.2f Kč" | format(stat.total) }}</td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="2" class="px-6 py-4 text-center text-gray-500">Žádné statistiky.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
 
 <h2 class="text-3xl font-bold mt-8 mb-4">Poslední zakázky</h2>
-<div class="bg-white p-6 rounded-lg shadow-md">
+<div class="bg-white p-6 rounded-lg shadow-md overflow-x-auto">
     <table class="min-w-full divide-y divide-gray-200">
         <thead class="bg-gray-50">
             <tr>
@@ -104,7 +117,7 @@
 </div>
 
 <h2 class="text-3xl font-bold mt-8 mb-4">Zakázky před termínem</h2>
-<div class="bg-white p-6 rounded-lg shadow-md">
+<div class="bg-white p-6 rounded-lg shadow-md overflow-x-auto">
     <table class="min-w-full divide-y divide-gray-200">
         <thead class="bg-gray-50">
             <tr>

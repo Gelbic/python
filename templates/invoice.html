@@ -6,11 +6,13 @@
     <div class="flex justify-between items-center mb-8">
         <h1 class="text-3xl font-bold">FAKTURA</h1>
         <div class="text-right">
-            <p><strong>Číslo zakázky:</strong> {{ job.job_number }}</p>
-            <p><strong>Datum fakturace:</strong> {{ job.invoice_date | default(now_date) }}</p>
+            <p><strong>Číslo faktury:</strong> {{ invoice.invoice_number }}</p>
+            <p><strong>Datum vystavení:</strong> {{ invoice.invoice_date }}</p>
+            <p><strong>Datum splatnosti:</strong> {{ invoice.due_date }}</p>
+            <p><strong>Forma úhrady:</strong> {{ invoice.payment_type }}</p>
             <p class="no-print mt-2">
-                {% if job.payment_status == 'Nezaplaceno' %}
-                <form action="{{ url_for('set_invoice_paid', job_id=job.id) }}" method="post" class="inline">
+                {% if invoice.payment_status == 'Nezaplaceno' %}
+                <form action="{{ url_for('set_invoice_paid', invoice_id=invoice.id) }}" method="post" class="inline">
                     <button type="submit" class="bg-blue-600 text-white py-1 px-3 rounded-md hover:bg-blue-700">Označit jako uhrazeno</button>
                 </form>
                 {% else %}
@@ -23,13 +25,15 @@
     <div class="grid grid-cols-2 gap-4 mb-8">
         <div>
             <h2 class="font-semibold text-lg mb-2">Dodavatel</h2>
-            <p>Firma: Správce zakázek</p>
-            <p>Adresa: Svitavy</p>
-            <p>E-mail: info@správazakázek.cz</p>
-            <p>Telefon: +420 123 456 789</p>
+            <p>Firma: {{ supplier.company_name if supplier else 'Není nastaveno' }}</p>
+            <p>Adresa: {{ supplier.address if supplier else 'Není nastaveno' }}</p>
+            <p>IČO: {{ supplier.ico if supplier else 'Není nastaveno' }}</p>
+            <p>DIČ: {{ supplier.dic if supplier else 'Není nastaveno' }}</p>
+            <p>Číslo účtu: {{ supplier.bank_account if supplier else 'Není nastaveno' }} / {{ supplier.bank_code if supplier else 'Není nastaveno' }}</p>
+            <p>Variabilní symbol: {{ supplier.variable_symbol if supplier else 'Není nastaveno' }}</p>
         </div>
         <div>
-            <h2 class="font-semibold text-lg mb-2">Zákazník</h2>
+            <h2 class="font-semibold text-lg mb-2">Odběratel</h2>
             <p>Firma: {{ job.company }}</p>
             <p>Jméno: {{ job.customer_name }}</p>
             <p>Adresa: {{ job.address }}</p>

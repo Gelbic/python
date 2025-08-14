@@ -1,6 +1,5 @@
-<!-- Soubor: templates/job_form.html -->
 {% extends "layout.html" %}
-{% block title %}Přidat zakázku{% endblock %}
+{% block title %}{{ 'Upravit' if job else 'Nová' }} zakázku{% endblock %}
 {% block content %}
 <h1 class="text-4xl font-bold mb-6">{{ 'Upravit' if job else 'Nová' }} zakázka</h1>
 <form action="{{ url_for('add_job') if not job else url_for('edit_job', job_id=job.id) }}" method="post" class="bg-white p-6 rounded-lg shadow-md max-w-lg mx-auto">
@@ -12,14 +11,67 @@
         <label for="job_name" class="block text-gray-700">Název zakázky</label>
         <input type="text" id="job_name" name="job_name" value="{{ job.job_name if job else '' }}" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
     </div>
-    <div class="mb-4">
-        <label for="customer_id" class="block text-gray-700">Zákazník</label>
-        <select id="customer_id" name="customer_id" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
-            {% for customer in customers %}
-                <option value="{{ customer.id }}" {% if job and customer.id == job.customer_id %}selected{% endif %}>{{ customer.name }}</option>
-            {% endfor %}
-        </select>
+
+    <div class="border-t border-b border-gray-200 py-4 my-4">
+        {% if job %}
+            <div class="mb-4">
+                <label for="customer_id" class="block text-gray-700">Zákazník</label>
+                <select id="customer_id" name="customer_id" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                    {% for customer in customers %}
+                        <option value="{{ customer.id }}" {% if job and customer.id == job.customer_id %}selected{% endif %}>{{ customer.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        {% else %}
+            <div class="space-y-2 mb-4">
+                <div class="flex items-center">
+                    <input type="radio" id="customer_choice_existing" name="customer_choice" value="existing" {% if customers %}checked{% endif %} {% if not customers %}disabled{% endif %} class="h-4 w-4 text-indigo-600 border-gray-300 focus:ring-indigo-500">
+                    <label for="customer_choice_existing" class="ml-3 block text-sm font-medium text-gray-700">Vybrat existujícího zákazníka</label>
+                </div>
+                <div class="flex items-center">
+                    <input type="radio" id="customer_choice_new" name="customer_choice" value="new" {% if not customers %}checked{% endif %} class="h-4 w-4 text-indigo-600 border-gray-300 focus:ring-indigo-500">
+                    <label for="customer_choice_new" class="ml-3 block text-sm font-medium text-gray-700">Vytvořit nového zákazníka</label>
+                </div>
+            </div>
+
+            <div id="existing-customer-section">
+                <select id="customer_id" name="customer_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                    {% if not customers %}
+                        <option disabled selected value="">Nejsou založeni žádní zákazníci</option>
+                    {% else %}
+                        {% for customer in customers %}
+                            <option value="{{ customer.id }}">{{ customer.name }}</option>
+                        {% endfor %}
+                    {% endif %}
+                </select>
+            </div>
+
+            <div id="new-customer-form" class="hidden mt-4 space-y-4">
+                <h3 class="text-lg font-semibold text-gray-700">Údaje nového zákazníka</h3>
+                 <div>
+                    <label for="new_customer_name" class="block text-gray-700">Jméno / Firma</label>
+                    <input type="text" id="new_customer_name" name="new_customer_name" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+                </div>
+                <div>
+                    <label for="new_customer_company" class="block text-gray-700">Firma (doplněk)</label>
+                    <input type="text" id="new_customer_company" name="new_customer_company" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+                </div>
+                <div>
+                    <label for="new_customer_address" class="block text-gray-700">Adresa</label>
+                    <input type="text" id="new_customer_address" name="new_customer_address" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+                </div>
+                <div>
+                    <label for="new_customer_phone" class="block text-gray-700">Telefon</label>
+                    <input type="tel" id="new_customer_phone" name="new_customer_phone" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+                </div>
+                <div>
+                    <label for="new_customer_email" class="block text-gray-700">E-mail</label>
+                    <input type="email" id="new_customer_email" name="new_customer_email" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+                </div>
+            </div>
+        {% endif %}
     </div>
+    
     <div class="mb-4">
         <label for="description" class="block text-gray-700">Popis</label>
         <textarea id="description" name="description" rows="4" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">{{ job.description if job else '' }}</textarea>
@@ -49,4 +101,38 @@
         <button type="submit" class="bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700">Uložit</button>
     </div>
 </form>
+
+{% if not job %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const choiceExisting = document.getElementById('customer_choice_existing');
+    const choiceNew = document.getElementById('customer_choice_new');
+    const existingSection = document.getElementById('existing-customer-section');
+    const newSection = document.getElementById('new-customer-form');
+    const customerSelect = document.getElementById('customer_id');
+    const newCustomerNameInput = document.getElementById('new_customer_name');
+
+    function toggleCustomerSections() {
+        if (choiceNew.checked) {
+            newSection.classList.remove('hidden');
+            existingSection.classList.add('hidden');
+            newCustomerNameInput.required = true;
+            customerSelect.required = false;
+        } else {
+            existingSection.classList.remove('hidden');
+            newSection.classList.add('hidden');
+            newCustomerNameInput.required = false;
+            customerSelect.required = !customerSelect.disabled && customerSelect.options.length > 0 && customerSelect.value !== "";
+        }
+    }
+
+    if(choiceExisting && choiceNew) {
+        choiceExisting.addEventListener('change', toggleCustomerSections);
+        choiceNew.addEventListener('change', toggleCustomerSections);
+    }
+    
+    toggleCustomerSections();
+});
+</script>
+{% endif %}
 {% endblock %}

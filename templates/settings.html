@@ -1,0 +1,41 @@
+<!-- Soubor: templates/settings.html -->
+{% extends "layout.html" %}
+{% block title %}Nastavení{% endblock %}
+{% block content %}
+<h1 class="text-4xl font-bold mb-6">Nastavení dodavatele</h1>
+<div class="bg-white p-6 rounded-lg shadow-md max-w-lg mx-auto">
+    <form action="{{ url_for('settings') }}" method="post">
+        <div class="mb-4">
+            <label for="company_name" class="block text-gray-700">Název firmy</label>
+            <input type="text" id="company_name" name="company_name" value="{{ supplier.company_name if supplier else '' }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+        </div>
+        <div class="mb-4">
+            <label for="address" class="block text-gray-700">Adresa / Sídlo</label>
+            <input type="text" id="address" name="address" value="{{ supplier.address if supplier else '' }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+        </div>
+        <div class="mb-4">
+            <label for="ico" class="block text-gray-700">IČO</label>
+            <input type="text" id="ico" name="ico" value="{{ supplier.ico if supplier else '' }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+        </div>
+        <div class="mb-4">
+            <label for="dic" class="block text-gray-700">DIČ</label>
+            <input type="text" id="dic" name="dic" value="{{ supplier.dic if supplier else '' }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+        </div>
+        <div class="mb-4">
+            <label for="bank_account" class="block text-gray-700">Číslo účtu</label>
+            <input type="text" id="bank_account" name="bank_account" value="{{ supplier.bank_account if supplier else '' }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+        </div>
+        <div class="mb-4">
+            <label for="bank_code" class="block text-gray-700">Kód banky</label>
+            <input type="text" id="bank_code" name="bank_code" value="{{ supplier.bank_code if supplier else '' }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+        </div>
+        <div class="mb-4">
+            <label for="variable_symbol" class="block text-gray-700">Variabilní symbol</label>
+            <input type="text" id="variable_symbol" name="variable_symbol" value="{{ supplier.variable_symbol if supplier else '' }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+        </div>
+        <div class="flex justify-end space-x-2">
+            <button type="submit" class="bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700">Uložit nastavení</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

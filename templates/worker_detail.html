@@ -1,0 +1,44 @@
+<!-- Soubor: templates/worker_detail.html -->
+{% extends "layout.html" %}
+{% block title %}Detail pracovníka{% endblock %}
+{% block content %}
+<div class="flex justify-between items-center mb-6">
+    <h1 class="text-4xl font-bold">Pracovník: {{ worker.name }}</h1>
+    <a href="{{ url_for('worker_list') }}" class="bg-gray-600 text-white py-2 px-4 rounded-md hover:bg-gray-700">Zpět na pracovníky</a>
+</div>
+<div class="bg-white p-6 rounded-lg shadow-md mb-8">
+    <p><strong>E-mail:</strong> {{ worker.email }}</p>
+    <p><strong>Telefon:</strong> {{ worker.phone }}</p>
+</div>
+<h2 class="text-3xl font-bold mt-8 mb-4">Přiřazené zakázky</h2>
+<div class="bg-white p-6 rounded-lg shadow-md overflow-x-auto">
+    <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+            <tr>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Číslo zakázky</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Název zakázky</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Celkem hodin</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stav</th>
+                <th class="px-6 py-3"></th>
+            </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+            {% for job in jobs %}
+            <tr>
+                <td class="px-6 py-4 whitespace-nowrap">{{ job.job_number }}</td>
+                <td class="px-6 py-4 whitespace-nowrap">{{ job.job_name }}</td>
+                <td class="px-6 py-4 whitespace-nowrap">{{ "%.2f" | format(job.total_hours) }}</td>
+                <td class="px-6 py-4 whitespace-nowrap">{{ job.status }}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                    <a href="{{ url_for('job_detail', job_id=job.id) }}" class="text-indigo-600 hover:text-indigo-900">Detail</a>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="5" class="px-6 py-4 text-center text-gray-500">Pracovník nebyl přidělen k žádné zakázce.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
