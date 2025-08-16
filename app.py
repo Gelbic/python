@@ -107,11 +107,7 @@ def init_db():
         );
     """)
     
-<<<<<<< HEAD
     # Tabulka: Údaje o dodavateli
-=======
-    # NOVÁ TABULKA: Údaje o dodavateli
->>>>>>> 53b87cff878a958c3473b9e52886b76ca79a3956
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS supplier_info (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -125,11 +121,7 @@ def init_db():
         );
     """)
 
-<<<<<<< HEAD
     # Tabulka: Faktury
-=======
-    # Upravení tabulky invoices
->>>>>>> 53b87cff878a958c3473b9e52886b76ca79a3956
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS invoices (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -423,7 +415,6 @@ def add_customer():
         
     return render_template("customer_form.html")
     
-<<<<<<< HEAD
 @app.route("/customers/<int:customer_id>/delete", methods=["POST"])
 @login_required
 def delete_customer(customer_id):
@@ -432,19 +423,6 @@ def delete_customer(customer_id):
     
     jobs = conn.execute("SELECT id FROM jobs WHERE customer_id = ?", (customer_id,)).fetchall()
     
-=======
-# NOVÁ ROUTA: Smazání zákazníka a jeho zakázek
-@app.route("/customers/<int:customer_id>/delete", methods=["POST"])
-@login_required
-def delete_customer(customer_id):
-    """Smaže zákazníka a všechny jeho související zakázky, úkoly, odpracované hodiny a faktury."""
-    conn = get_db_connection()
-    
-    # 1. Najdi všechny zakázky daného zákazníka
-    jobs = conn.execute("SELECT id FROM jobs WHERE customer_id = ?", (customer_id,)).fetchall()
-    
-    # 2. Smaž související data (úkoly, hodiny, služby, faktury) pro každou zakázku
->>>>>>> 53b87cff878a958c3473b9e52886b76ca79a3956
     for job in jobs:
         job_id = job['id']
         conn.execute("DELETE FROM tasks WHERE job_id = ?", (job_id,))
@@ -452,14 +430,7 @@ def delete_customer(customer_id):
         conn.execute("DELETE FROM additional_services WHERE job_id = ?", (job_id,))
         conn.execute("DELETE FROM invoices WHERE job_id = ?", (job_id,))
     
-<<<<<<< HEAD
     conn.execute("DELETE FROM jobs WHERE customer_id = ?", (customer_id,))
-=======
-    # 3. Smaž samotné zakázky
-    conn.execute("DELETE FROM jobs WHERE customer_id = ?", (customer_id,))
-    
-    # 4. Smaž zákazníka
->>>>>>> 53b87cff878a958c3473b9e52886b76ca79a3956
     conn.execute("DELETE FROM customers WHERE id = ?", (customer_id,))
     
     conn.commit()
@@ -467,17 +438,12 @@ def delete_customer(customer_id):
     
     return redirect(url_for("customer_list"))
     
-<<<<<<< HEAD
-=======
-# NOVÁ ROUTA: Historie zakázek pro zákazníka
->>>>>>> 53b87cff878a958c3473b9e52886b76ca79a3956
 @app.route("/customers/<int:customer_id>/history")
 @login_required
 def customer_history(customer_id):
     """Zobrazí historii zakázek pro konkrétního zákazníka."""
     conn = get_db_connection()
     customer = conn.execute("SELECT * FROM customers WHERE id = ?", (customer_id,)).fetchone()
-<<<<<<< HEAD
     
     if customer is None:
         conn.close()
@@ -486,14 +452,6 @@ def customer_history(customer_id):
     jobs = conn.execute("SELECT * FROM jobs WHERE customer_id = ? ORDER BY due_date DESC", (customer_id,)).fetchall()
     conn.close()
     
-=======
-    jobs = conn.execute("SELECT * FROM jobs WHERE customer_id = ? ORDER BY due_date DESC", (customer_id,)).fetchall()
-    conn.close()
-    
-    if customer is None:
-        return "Zákazník nenalezen.", 404
-        
->>>>>>> 53b87cff878a958c3473b9e52886b76ca79a3956
     return render_template("customer_history.html", customer=customer, jobs=jobs)
 
 # --- Úkoly ---
@@ -561,41 +519,21 @@ def add_worker():
     
     return render_template("worker_form.html")
 
-<<<<<<< HEAD
 @app.route("/workers/<int:worker_id>/delete", methods=["POST"])
 @login_required
 def delete_worker(worker_id):
     """Smaže pracovníka."""
     conn = get_db_connection()
     conn.execute("UPDATE hours_spent SET worker_id = NULL WHERE worker_id = ?", (worker_id,))
-=======
-# NOVÁ ROUTA: Smazání pracovníka
-@app.route("/workers/<int:worker_id>/delete", methods=["POST"])
-@login_required
-def delete_worker(worker_id):
-    """Smaže pracovníka a jeho přiřazení k odpracovaným hodinám."""
-    conn = get_db_connection()
-    # 1. Odstraň přiřazení pracovníka z odpracovaných hodin
-    conn.execute("UPDATE hours_spent SET worker_id = NULL WHERE worker_id = ?", (worker_id,))
-    # 2. Smaž samotného pracovníka
->>>>>>> 53b87cff878a958c3473b9e52886b76ca79a3956
     conn.execute("DELETE FROM workers WHERE id = ?", (worker_id,))
     conn.commit()
     conn.close()
     return redirect(url_for("worker_list"))
     
-<<<<<<< HEAD
 @app.route("/workers/<int:worker_id>")
 @login_required
 def worker_detail(worker_id):
     """Zobrazí detail konkrétního pracovníka."""
-=======
-# NOVÁ ROUTA: Detail pracovníka
-@app.route("/workers/<int:worker_id>")
-@login_required
-def worker_detail(worker_id):
-    """Zobrazí detail konkrétního pracovníka a jeho přiřazené zakázky."""
->>>>>>> 53b87cff878a958c3473b9e52886b76ca79a3956
     conn = get_db_connection()
     worker = conn.execute("SELECT * FROM workers WHERE id = ?", (worker_id,)).fetchone()
     
@@ -609,10 +547,7 @@ def worker_detail(worker_id):
         LEFT JOIN jobs ON hours_spent.job_id = jobs.id
         WHERE hours_spent.worker_id = ?
         GROUP BY jobs.id
-<<<<<<< HEAD
         ORDER BY jobs.due_date DESC
-=======
->>>>>>> 53b87cff878a958c3473b9e52886b76ca79a3956
     """, (worker_id,)).fetchall()
     
     conn.close()
@@ -662,14 +597,10 @@ def invoice_list():
     """Zobrazí seznam všech vygenerovaných faktur."""
     conn = get_db_connection()
     invoices = conn.execute("""
-<<<<<<< HEAD
         SELECT 
             invoices.*, 
             jobs.job_name, 
             customers.name AS customer_name
-=======
-        SELECT invoices.*, jobs.job_number, jobs.job_name, jobs.invoice_date, jobs.payment_status, customers.name AS customer_name
->>>>>>> 53b87cff878a958c3473b9e52886b76ca79a3956
         FROM invoices
         LEFT JOIN jobs ON invoices.job_id = jobs.id
         LEFT JOIN customers ON jobs.customer_id = customers.id
@@ -678,33 +609,10 @@ def invoice_list():
     conn.close()
     return render_template("invoice_list.html", invoices=invoices)
 
-<<<<<<< HEAD
-=======
-# NOVÁ ROUTA: Odstranění faktury
->>>>>>> 53b87cff878a958c3473b9e52886b76ca79a3956
 @app.route("/invoices/<int:invoice_id>/delete", methods=["POST"])
 @login_required
 def delete_invoice(invoice_id):
     """Smaže fakturu."""
-<<<<<<< HEAD
-=======
-    conn = get_db_connection()
-    conn.execute("DELETE FROM invoices WHERE id = ?", (invoice_id,))
-    conn.commit()
-    conn.close()
-    return redirect(url_for("invoice_list"))
-
-@app.route("/jobs/<int:job_id>/generate-invoice-form")
-@login_required
-def generate_invoice_form(job_id):
-    """Zobrazí formulář pro vygenerování faktury."""
-    return render_template("invoice_form.html", job_id=job_id)
-
-@app.route("/jobs/<int:job_id>/create-invoice", methods=["POST"])
-@login_required
-def create_invoice(job_id):
-    """Uloží fakturu do databáze a přesměruje na její náhled."""
->>>>>>> 53b87cff878a958c3473b9e52886b76ca79a3956
     conn = get_db_connection()
     conn.execute("DELETE FROM invoices WHERE id = ?", (invoice_id,))
     conn.commit()
@@ -766,7 +674,6 @@ def view_invoice(invoice_id):
         conn.close()
         return "Faktura nenalezena.", 404
     
-<<<<<<< HEAD
     job = conn.execute("""
         SELECT jobs.*, customers.name AS customer_name, customers.company, customers.address, customers.phone, customers.email
         FROM jobs
@@ -780,65 +687,11 @@ def view_invoice(invoice_id):
     additional_services = conn.execute("SELECT * FROM additional_services WHERE job_id = ?", (job['id'],)).fetchall()
     
     supplier = conn.execute("SELECT * FROM supplier_info LIMIT 1").fetchone()
-=======
-    job = conn.execute("SELECT * FROM jobs WHERE id = ?", (job_id,)).fetchone()
-    
-    hours = conn.execute("SELECT SUM(hours) AS total_hours FROM hours_spent WHERE job_id = ?", (job_id,)).fetchone()['total_hours'] or 0
-    additional_services = conn.execute("SELECT * FROM additional_services WHERE job_id = ?", (job_id,)).fetchall()
-    
-    total_services_cost = sum(s['cost'] for s in additional_services)
-    total_price_hourly = float(hours) * float(job['hourly_rate']) if job['hourly_rate'] else 0
-    total_price_fixed = float(job['price']) if job['price'] else 0
-    total_price = total_price_hourly + total_price_fixed + total_services_cost
-    
-    invoice_number = request.form["invoice_number"]
-    payment_type = request.form["payment_type"]
-    invoice_date = datetime.date.today().isoformat()
-    due_date = (datetime.date.today() + datetime.timedelta(days=14)).isoformat()
-
-    conn.execute("""
-        INSERT INTO invoices (job_id, invoice_number, invoice_date, due_date, payment_type, total_price, payment_status)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
-    """, (job_id, invoice_number, invoice_date, due_date, payment_type, total_price, "Nezaplaceno"))
-    
-    conn.execute("UPDATE jobs SET status = 'Fakturovaná' WHERE id = ?", (job_id,))
-    conn.commit()
-    
-    invoice_id = conn.execute("SELECT id FROM invoices WHERE job_id = ?", (job_id,)).fetchone()['id']
-    conn.close()
-    
-    return redirect(url_for('view_invoice', invoice_id=invoice_id))
-
-@app.route("/invoices/<int:invoice_id>/view")
-@login_required
-def view_invoice(invoice_id):
-    """Zobrazí fakturu."""
-    conn = get_db_connection()
-    invoice = conn.execute("SELECT * FROM invoices WHERE id = ?", (invoice_id,)).fetchone()
-    
-    if invoice is None:
-        conn.close()
-        return "Faktura nenalezena.", 404
-    
-    job = conn.execute("""
-        SELECT jobs.*, customers.name AS customer_name, customers.company, customers.address, customers.phone, customers.email
-        FROM jobs
-        LEFT JOIN customers ON jobs.customer_id = customers.id
-        WHERE jobs.id = ?
-    """, (invoice['job_id'],)).fetchone()
-
-    hours = conn.execute("SELECT SUM(hours) AS total_hours FROM hours_spent WHERE job_id = ?", (job['id'],)).fetchone()['total_hours'] or 0
-    additional_services = conn.execute("SELECT * FROM additional_services WHERE job_id = ?", (job['id'],)).fetchall()
-    
-    total_price = invoice['total_price']
-    supplier = conn.execute("SELECT * FROM supplier_info WHERE id = 1").fetchone()
->>>>>>> 53b87cff878a958c3473b9e52886b76ca79a3956
     
     conn.close()
     if job is None:
         return "Související zakázka nenalezena.", 404
         
-<<<<<<< HEAD
     return render_template("invoice.html", job=job, hours=hours, invoice=invoice, additional_services=additional_services, supplier=supplier)
 
 
@@ -846,15 +699,6 @@ def view_invoice(invoice_id):
 @login_required
 def set_invoice_paid(invoice_id):
     """Označí fakturu jako uhrazenou."""
-=======
-    return render_template("invoice.html", job=job, hours=hours, total_price=total_price, invoice=invoice, additional_services=additional_services, supplier=supplier)
-
-
-# Routa pro nastavení stavu zakázky jako uhrazené
-@app.route("/invoices/<int:invoice_id>/set_paid", methods=["POST"])
-@login_required
-def set_invoice_paid(invoice_id):
->>>>>>> 53b87cff878a958c3473b9e52886b76ca79a3956
     conn = get_db_connection()
     
     invoice = conn.execute("SELECT job_id, total_price FROM invoices WHERE id = ?", (invoice_id,)).fetchone()
@@ -881,7 +725,6 @@ def set_job_status_done(job_id):
     conn.close()
     return redirect(url_for("job_detail", job_id=job_id))
 
-<<<<<<< HEAD
 # --- Nastavení ---
 @app.route("/settings", methods=["GET", "POST"])
 @login_required
@@ -889,14 +732,6 @@ def settings():
     """Stránka pro nastavení údajů dodavatele."""
     conn = get_db_connection()
     supplier = conn.execute("SELECT * FROM supplier_info LIMIT 1").fetchone()
-=======
-# Routa pro stránku nastavení
-@app.route("/settings", methods=["GET", "POST"])
-@login_required
-def settings():
-    conn = get_db_connection()
-    supplier = conn.execute("SELECT * FROM supplier_info WHERE id = 1").fetchone()
->>>>>>> 53b87cff878a958c3473b9e52886b76ca79a3956
     
     if request.method == "POST":
         company_name = request.form["company_name"]
@@ -909,13 +744,7 @@ def settings():
         
         if supplier:
             conn.execute("""
-<<<<<<< HEAD
                 UPDATE supplier_info SET company_name = ?, address = ?, ico = ?, dic = ?, bank_account = ?, bank_code = ?, variable_symbol = ?
-=======
-                UPDATE supplier_info
-                SET company_name = ?, address = ?, ico = ?, dic = ?, bank_account = ?, bank_code = ?, variable_symbol = ?
-                WHERE id = 1
->>>>>>> 53b87cff878a958c3473b9e52886b76ca79a3956
             """, (company_name, address, ico, dic, bank_account, bank_code, variable_symbol))
         else:
             conn.execute("""
@@ -929,18 +758,11 @@ def settings():
     conn.close()
     return render_template("settings.html", supplier=supplier)
 
-<<<<<<< HEAD
 # --- Filtrované pohledy ---
 @app.route("/jobs/active")
 @login_required
 def active_jobs_list():
     """Zobrazí seznam aktivních zakázek."""
-=======
-# NOVÁ ROUTA pro zobrazení aktivních zakázek
-@app.route("/jobs/active")
-@login_required
-def active_jobs_list():
->>>>>>> 53b87cff878a958c3473b9e52886b76ca79a3956
     conn = get_db_connection()
     jobs = conn.execute("""
         SELECT jobs.*, customers.name AS customer_name
@@ -952,17 +774,10 @@ def active_jobs_list():
     conn.close()
     return render_template("job_list.html", jobs=jobs, title="Aktivní zakázky")
 
-<<<<<<< HEAD
 @app.route("/jobs/upcoming")
 @login_required
 def upcoming_jobs_list():
     """Zobrazí seznam zakázek před termínem."""
-=======
-# NOVÁ ROUTA pro zobrazení blížících se zakázek
-@app.route("/jobs/upcoming")
-@login_required
-def upcoming_jobs_list():
->>>>>>> 53b87cff878a958c3473b9e52886b76ca79a3956
     conn = get_db_connection()
     today = datetime.date.today()
     in_ten_days = today + datetime.timedelta(days=10)
@@ -976,7 +791,6 @@ def upcoming_jobs_list():
     conn.close()
     return render_template("job_list.html", jobs=jobs, title="Zakázky před termínem")
 
-<<<<<<< HEAD
 @app.route("/invoices/unpaid")
 @login_required
 def unpaid_invoices_list():
@@ -987,16 +801,6 @@ def unpaid_invoices_list():
             invoices.*, 
             jobs.job_name, 
             customers.name AS customer_name
-=======
-
-# NOVÁ ROUTA pro zobrazení neuhrazených faktur
-@app.route("/invoices/unpaid")
-@login_required
-def unpaid_invoices_list():
-    conn = get_db_connection()
-    invoices = conn.execute("""
-        SELECT invoices.*, jobs.job_number, jobs.job_name, jobs.invoice_date, jobs.payment_status, customers.name AS customer_name
->>>>>>> 53b87cff878a958c3473b9e52886b76ca79a3956
         FROM invoices
         LEFT JOIN jobs ON invoices.job_id = jobs.id
         LEFT JOIN customers ON jobs.customer_id = customers.id
